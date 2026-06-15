@@ -9,6 +9,8 @@
         "php": "^8.4",
         "ext-grpc": "*",
         "ext-gd": "*",
+        "ext-zip": "*",
+        "ext-sodium": "*",
         "google/cloud-firestore": "^2.1",
         "kreait/laravel-firebase": "^7.2",
         "laravel/framework": "^12.0",
