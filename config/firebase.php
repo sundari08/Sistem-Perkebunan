@@ -7,8 +7,7 @@ return [
 
     'projects' => [
         'app' => [
-            // KITA GUNAKAN ARRAY LANGSUNG, BUKAN STRING
-            'credentials' => null, // Akan diisi di ServiceProvider
+            'credentials' => null, // ✅ Akan diisi di FirebaseServiceProvider::boot()
             
             'auth' => [
                 'tenant_id' => env('FIREBASE_AUTH_TENANT_ID'),
