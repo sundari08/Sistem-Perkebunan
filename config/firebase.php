@@ -8,7 +8,7 @@ return [
     'projects' => [
         'app' => [
             // HANYA dari environment variable, TIDAK dari file
-            'credentials' => env('FIREBASE_CREDENTIALS'),
+            'credentials' => storage_path('app/firebase-auth.json'),
             
             'auth' => [
                 'tenant_id' => env('FIREBASE_AUTH_TENANT_ID'),
