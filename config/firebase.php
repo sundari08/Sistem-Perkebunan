@@ -7,7 +7,7 @@ return [
 
     'projects' => [
         'app' => [
-            'credentials' => null, // ✅ Akan diisi di FirebaseServiceProvider::boot()
+            'credentials' => env('FIREBASE_CREDENTIALS'),
             
             'auth' => [
                 'tenant_id' => env('FIREBASE_AUTH_TENANT_ID'),
