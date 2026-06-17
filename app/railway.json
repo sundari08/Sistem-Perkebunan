@@ -1,0 +1,25 @@
+{
+  "build": {
+    "builder": "nixpacks",
+    "nixpacksPlan": {
+      "phases": {
+        "setup": {
+          "nixPkgs": [
+            "php84",
+            "php84Extensions.grpc",
+            "php84Extensions.gd",
+            "php84Extensions.sodium",
+            "php84Extensions.zip",
+            "php84Extensions.openssl",
+            "php84Extensions.curl"
+          ]
+        },
+        "install": {
+          "cmds": [
+            "composer install --optimize-autoloader --no-interaction --ignore-platform-req=ext-zip"
+          ]
+        }
+      }
+    }
+  }
+}
