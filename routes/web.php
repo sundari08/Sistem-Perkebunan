@@ -13,7 +13,8 @@ Route::get('/', function () {
 }); 
 
 // ========== ROUTE LOGOUT ==========
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+// Ubah dari hanya POST menjadi POST dan GET
+Route::match(['GET', 'POST'], '/logout', [AuthController::class, 'logout'])->name('logout');
 
 // ========== ROUTE ADMIN ==========
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
