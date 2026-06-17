@@ -27,19 +27,37 @@ class FirebaseServiceProvider extends ServiceProvider
         }
     }
 
+    // Di ServiceProvider, tambahkan fallback
     protected function decodeFirebaseCredentials(): void
     {
         $credentials = env('FIREBASE_CREDENTIALS');
         
+        // Jika credentials adalah file path yang valid
+        if ($credentials && is_string($credentials) && file_exists($credentials)) {
+            $content = file_get_contents($credentials);
+            $decoded = json_decode($content, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                Config::set('firebase.projects.app.credentials', $decoded);
+                return;
+            }
+        }
+        
+        // Jika credentials adalah JSON string
         if ($credentials && is_string($credentials) && str_starts_with(trim($credentials), '{')) {
             $decoded = json_decode($credentials, true);
-            
             if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                // Set credentials sebagai array
                 Config::set('firebase.projects.app.credentials', $decoded);
-                
-                // Log untuk debugging (opsional)
-                // \Log::info('Firebase credentials decoded successfully');
+                return;
+            }
+        }
+        
+        // Fallback: coba GOOGLE_APPLICATION_CREDENTIALS
+        $googleCreds = env('GOOGLE_APPLICATION_CREDENTIALS');
+        if ($googleCreds && is_string($googleCreds) && file_exists($googleCreds)) {
+            $content = file_get_contents($googleCreds);
+            $decoded = json_decode($content, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                Config::set('firebase.projects.app.credentials', $decoded);
             }
         }
     }
