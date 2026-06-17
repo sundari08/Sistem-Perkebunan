@@ -17,7 +17,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // ========== ROUTE ADMIN ==========
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+    // Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/users', [AdminController::class, 'usersIndex'])->name('users.index');
     Route::get('/users/create', [AdminController::class, 'usersCreate'])->name('users.create');
     Route::post('/users', [AdminController::class, 'usersStore'])->name('users.store');
