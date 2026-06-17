@@ -156,7 +156,6 @@ return [
      */
     // ✅ TAMBAHKAN INI UNTUK FIREBASE
     Kreait\Laravel\Firebase\ServiceProvider::class,
-    App\Providers\FirebaseServiceProvider::class,
 
     /*
      * Application Service Providers...

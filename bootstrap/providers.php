@@ -6,7 +6,4 @@ return [
     
     // Firebase ServiceProvider dari package
     Kreait\Laravel\Firebase\ServiceProvider::class,
-    
-    // ServiceProvider kita (harus AFTER package)
-    App\Providers\FirebaseServiceProvider::class,
 ];

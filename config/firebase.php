@@ -2,12 +2,23 @@
 
 declare(strict_types=1);
 
+// Decode credentials langsung di sini
+$credentials = env('FIREBASE_CREDENTIALS');
+$decodedCredentials = null;
+
+if ($credentials && is_string($credentials) && str_starts_with(trim($credentials), '{')) {
+    $decoded = json_decode($credentials, true);
+    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+        $decodedCredentials = $decoded;
+    }
+}
+
 return [
     'default' => env('FIREBASE_PROJECT', 'app'),
 
     'projects' => [
         'app' => [
-            'credentials' => null, // Akan diisi oleh ServiceProvider
+            'credentials' => $decodedCredentials, // Langsung pakai array hasil decode
             
             'auth' => [
                 'tenant_id' => env('FIREBASE_AUTH_TENANT_ID'),
