@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ["php84"]
+nixPkgs = ["php84", "composer"]
 
 [phases.install]
 cmds = ["composer install --optimize-autoloader --no-interaction"]
