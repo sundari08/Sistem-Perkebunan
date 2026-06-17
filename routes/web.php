@@ -9,9 +9,8 @@ use App\Http\Controllers\AdminController;
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
-// ========== ROUTE LOGOUT (HANYA SATU) ==========
+// ========== ROUTE LOGOUT ==========
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-// HAPUS route GET /logout di bawah ini!
 
 // ========== ROUTE ADMIN ==========
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -36,7 +35,11 @@ Route::middleware(['auth'])->group(function () {
     
     // Dashboard
     Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard');
+    
+    // Export Excel - HANYA SATU!
     Route::get('/panen/export', [FirebaseController::class, 'exportExcel'])->name('panen.export');
+    // HAPUS route /export-panen di bawah ini!
+    
     Route::get('/debug-session', function() {
         return [
             'username' => session('username'),
@@ -74,7 +77,6 @@ Route::middleware(['auth'])->group(function () {
     // Route untuk LIHAT LAPORAN (semua role)
     Route::middleware(['role:lihat_laporan'])->group(function () {
         Route::get('/panen', [FirebaseController::class, 'index'])->name('panen.index');
-        Route::get('/export-panen', [FirebaseController::class, 'exportExcel'])->name('panen.export');
     });
     
     // API untuk dropdown
