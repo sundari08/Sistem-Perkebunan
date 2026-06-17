@@ -7,7 +7,7 @@ return [
 
     'projects' => [
         'app' => [
-            'credentials' => env('FIREBASE_CREDENTIALS'),
+            'credentials' => null, // Akan diisi oleh ServiceProvider
             
             'auth' => [
                 'tenant_id' => env('FIREBASE_AUTH_TENANT_ID'),

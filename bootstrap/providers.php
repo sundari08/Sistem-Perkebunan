@@ -3,6 +3,10 @@
 return [
     App\Providers\AppServiceProvider::class,
     App\Providers\EventServiceProvider::class,
+    
+    // Firebase ServiceProvider dari package
     Kreait\Laravel\Firebase\ServiceProvider::class,
-    App\Providers\FirebaseServiceProvider::class, // ← Tambahkan
+    
+    // ServiceProvider kita (harus AFTER package)
+    App\Providers\FirebaseServiceProvider::class,
 ];
