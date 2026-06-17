@@ -5,18 +5,17 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FirebaseController;
 use App\Http\Controllers\AdminController;
 
-
 // ========== ROUTE LOGIN ==========
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+
+// ========== ROUTE LOGOUT (HANYA SATU) ==========
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+// HAPUS route GET /logout di bawah ini!
 
 // ========== ROUTE ADMIN ==========
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    // Dashboard
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
-    
-    // CRUD User
     Route::get('/users', [AdminController::class, 'usersIndex'])->name('users.index');
     Route::get('/users/create', [AdminController::class, 'usersCreate'])->name('users.create');
     Route::post('/users', [AdminController::class, 'usersStore'])->name('users.store');
@@ -24,7 +23,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('/users/{id}', [AdminController::class, 'usersUpdate'])->name('users.update');
     Route::delete('/users/{id}', [AdminController::class, 'usersDestroy'])->name('users.destroy');
     
-    // CRUD Estate
     Route::get('/estates', [AdminController::class, 'estatesIndex'])->name('estates.index');
     Route::get('/estates/create', [AdminController::class, 'estatesCreate'])->name('estates.create');
     Route::post('/estates', [AdminController::class, 'estatesStore'])->name('estates.store');
@@ -38,7 +36,6 @@ Route::middleware(['auth'])->group(function () {
     
     // Dashboard
     Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard');
-    Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/panen/export', [FirebaseController::class, 'exportExcel'])->name('panen.export');
     Route::get('/debug-session', function() {
         return [
@@ -74,15 +71,6 @@ Route::middleware(['auth'])->group(function () {
     // Route untuk DETAIL (show) - semua role yang login bisa lihat
     Route::get('/panen/{id}', [FirebaseController::class, 'show'])->name('panen.show');
 
-    Route::get('/debug-session', function() {
-        return response()->json([
-            'jabatan' => session('jabatan'),
-            'divisi' => session('divisi'),
-            'estate' => session('estate'),
-            'otorisasi' => session('otorisasi'),
-        ]);
-    });
-    
     // Route untuk LIHAT LAPORAN (semua role)
     Route::middleware(['role:lihat_laporan'])->group(function () {
         Route::get('/panen', [FirebaseController::class, 'index'])->name('panen.index');
