@@ -18,7 +18,7 @@ Route::match(['GET', 'POST'], '/logout', [AuthController::class, 'logout'])->nam
 
 // ========== ROUTE ADMIN ==========
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    // Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/admin', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/users', [AdminController::class, 'usersIndex'])->name('users.index');
     Route::get('/users/create', [AdminController::class, 'usersCreate'])->name('users.create');
     Route::post('/users', [AdminController::class, 'usersStore'])->name('users.store');

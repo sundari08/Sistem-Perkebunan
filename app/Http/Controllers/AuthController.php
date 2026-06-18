@@ -66,7 +66,7 @@ class AuthController extends Controller
         $jabatan = $userFound['jabatan'] ?? '';
         
         if ($jabatan == 'ADMIN') {
-            return redirect()->route('admin.dashboard')->with('success', 'Login berhasil! Selamat datang di Admin Panel.');
+            return redirect()->route('admin.dashboard')->with('success', 'Login berhasil!');
         } else {
             return redirect()->route('dashboard')->with('success', 'Login berhasil!');
         }
