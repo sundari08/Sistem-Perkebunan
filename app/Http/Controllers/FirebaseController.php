@@ -453,17 +453,7 @@ class FirebaseController extends Controller
     // Generate file Excel (PRIVATE METHOD)
     private function generateExcel($data, $startDate, $endDate, $jabatan = null, $filterDivisi = null, $filterUnit = null, $filterEstate = null)
     {
-        // Catat waktu untuk debugging
         \Log::info('generateExcel dipanggil, jumlah data: ' . count($data));
-
-        // Bersihkan semua output buffer (beberapa kali untuk memastikan)
-        while (ob_get_level()) {
-            ob_end_clean();
-        }
-        // Matikan output buffering sama sekali
-        ob_end_clean();
-        // Mulai ulang output buffering, tapi kita akan override
-        ob_start();
 
         // Buat spreadsheet
         $spreadsheet = new Spreadsheet();
@@ -544,22 +534,12 @@ class FirebaseController extends Controller
 
         // --- SIMPAN KE FILE SEMENTARA ---
         $tempFile = tempnam(sys_get_temp_dir(), 'excel_');
-        if ($tempFile === false) {
-            throw new \Exception('Gagal membuat file temporary');
-        }
-
         $writer = new Xlsx($spreadsheet);
         $writer->save($tempFile);
 
         \Log::info('generateExcel selesai, file: ' . $filename . ', temp: ' . $tempFile . ', size: ' . filesize($tempFile));
 
         // --- KIRIM MANUAL (seperti /test-download) ---
-        // Hapus semua output buffer yang mungkin ada
-        while (ob_get_level()) {
-            ob_end_clean();
-        }
-
-        // Set header
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
         header('Cache-Control: max-age=0');
@@ -567,12 +547,9 @@ class FirebaseController extends Controller
         header('Pragma: public');
         header('Content-Length: ' . filesize($tempFile));
 
-        // Kirim file
         readfile($tempFile);
         unlink($tempFile);
-
-        // Hentikan eksekusi sepenuhnya
-        die();
+        exit;
     }
 
     // Ambil daftar divisi yang tersedia untuk user yang login
