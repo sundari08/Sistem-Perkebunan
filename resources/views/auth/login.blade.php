@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Hasil Panen</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Favicon aman -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
 </head>
 <body class="bg-gray-100">
     <div class="min-h-screen flex items-center justify-center">
         <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
             <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-green-600"> Hasil Panen</h1>
+                <h1 class="text-3xl font-bold text-green-600">🌿 Hasil Panen</h1>
                 <p class="text-gray-600 mt-2">Silakan login untuk melanjutkan</p>
             </div>
 
@@ -26,6 +28,7 @@
                 </div>
             @endif
 
+            <!-- Form login dengan secure URL (pakai route helper) -->
             <form method="POST" action="{{ route('login.post') }}">
                 @csrf
                 <div class="mb-4">
