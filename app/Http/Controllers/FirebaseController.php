@@ -344,6 +344,10 @@ class FirebaseController extends Controller
     // Export ke Excel berdasarkan filter
     public function exportExcel(Request $request)
     {
+        \Log::info('=== EXPORT EXCEL START ===');
+        \Log::info('User: ' . session('username'));
+        \Log::info('Jabatan: ' . session('jabatan'));
+    
         $allData = $this->database->getReference($this->tablename)->getValue() ?? [];
         
         $jabatan = session('jabatan');
