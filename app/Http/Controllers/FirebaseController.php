@@ -451,38 +451,27 @@ class FirebaseController extends Controller
     }
 
     // Generate file Excel (PRIVATE METHOD)
-    private function generateExcel($data, $startDate, $endDate, $jabatan = null, $filterDivisi = null, $filterUnit = null, $filterEstate = null)
+   private function generateExcel($data, $startDate, $endDate, $jabatan = null, $filterDivisi = null, $filterUnit = null, $filterEstate = null)
     {
-        // Bersihkan semua output buffer yang mungkin ada
-        if (ob_get_length()) {
-            ob_clean();
-        }
-        flush();
-
         \Log::info('generateExcel dipanggil, jumlah data: ' . count($data));
 
-        // Jika data kosong, tetap buat file dengan 1 baris "Tidak ada data"
-        if (empty($data)) {
-            $data = [];
+        // Hapus semua output buffer yang mungkin ada
+        while (ob_get_level()) {
+            ob_end_clean();
         }
 
+        // Buat spreadsheet
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        // --- TITLE ---
+        // Title
         $title = "LAPORAN HASIL PANEN";
         if ($startDate && $endDate) {
             $title .= "\nPeriode: " . date('d/m/Y', strtotime($startDate)) . " - " . date('d/m/Y', strtotime($endDate));
         }
-        if (!empty($filterDivisi)) {
-            $title .= "\nFilter Divisi: " . $filterDivisi;
-        }
-        if (!empty($filterEstate)) {
-            $title .= "\nFilter Estate: " . $filterEstate;
-        }
-        if (!empty($filterUnit)) {
-            $title .= "\nFilter Unit: " . $filterUnit;
-        }
+        if (!empty($filterDivisi)) $title .= "\nFilter Divisi: " . $filterDivisi;
+        if (!empty($filterEstate)) $title .= "\nFilter Estate: " . $filterEstate;
+        if (!empty($filterUnit))   $title .= "\nFilter Unit: " . $filterUnit;
         $title .= "\nDiexport oleh: " . session('username') . " (" . session('jabatan') . ")";
 
         $sheet->setCellValue('A1', $title);
@@ -490,23 +479,23 @@ class FirebaseController extends Controller
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-        // --- HEADER ---
+        // Header
         $headers = [
             'No', 'Tanggal', 'Estate', 'Divisi', 'Blok',
             'Mandor', 'Kerani', 'TPH', 'Pemanen',
             'Janjang', 'Matang', 'Mentah', 'Kurang Matang',
             'Lewat Matang', 'Partenor Carpi', 'Buah Batu'
         ];
-        $column = 'A';
-        foreach ($headers as $header) {
-            $sheet->setCellValue($column . '3', $header);
-            $sheet->getStyle($column . '3')->getFont()->setBold(true);
-            $sheet->getStyle($column . '3')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFCCCCCC');
-            $sheet->getStyle($column . '3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $column++;
+        $col = 'A';
+        foreach ($headers as $h) {
+            $sheet->setCellValue($col . '3', $h);
+            $sheet->getStyle($col . '3')->getFont()->setBold(true);
+            $sheet->getStyle($col . '3')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFCCCCCC');
+            $sheet->getStyle($col . '3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $col++;
         }
 
-        // --- DATA ---
+        // Data
         $row = 4;
         $no = 1;
         foreach ($data as $item) {
@@ -529,18 +518,18 @@ class FirebaseController extends Controller
             $row++;
         }
 
-        // --- FOOTER ---
+        // Footer
         $footerRow = $row + 1;
         $sheet->setCellValue('A' . $footerRow, "Total Data: " . count($data));
         $sheet->mergeCells('A' . $footerRow . ':P' . $footerRow);
         $sheet->getStyle('A' . $footerRow)->getFont()->setItalic(true);
 
-        // --- AUTO SIZE COLUMNS ---
-        foreach (range('A', 'P') as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
+        // Auto size
+        foreach (range('A', 'P') as $c) {
+            $sheet->getColumnDimension($c)->setAutoSize(true);
         }
 
-        // --- NAMA FILE ---
+        // Nama file
         $username = session('username') ?? 'unknown';
         $filterText = '';
         if (!empty($filterUnit)) $filterText .= '_Unit_' . $filterUnit;
@@ -548,20 +537,18 @@ class FirebaseController extends Controller
         if (!empty($filterDivisi)) $filterText .= '_Divisi_' . $filterDivisi;
         $filename = 'Laporan_Hasil_Panen_' . $username . $filterText . '_' . date('Y-m-d_His') . '.xlsx';
 
-        // --- KIRIM FILE ---
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-        header('Cache-Control: max-age=0');
-        header('Cache-Control: must-revalidate');
-        header('Pragma: public');
-
+        // Simpan ke file sementara
+        $tempFile = tempnam(sys_get_temp_dir(), 'excel_');
         $writer = new Xlsx($spreadsheet);
-        $writer->save('php://output');
+        $writer->save($tempFile);
 
-        \Log::info('generateExcel selesai, file dikirim: ' . $filename);
+        \Log::info('generateExcel selesai, file: ' . $filename);
 
-        // Hentikan eksekusi agar tidak ada output tambahan
-        exit;
+        // Kembalikan response download (Laravel akan urus header)
+        return response()->download($tempFile, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Cache-Control' => 'max-age=0',
+        ])->deleteFileAfterSend(true);
     }
 
     // Ambil daftar divisi yang tersedia untuk user yang login
