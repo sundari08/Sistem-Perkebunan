@@ -343,16 +343,15 @@ class FirebaseController extends Controller
     
     // Export ke Excel berdasarkan filter
     public function exportExcel(Request $request)
-        {
-            while (ob_get_level() > 0) {
+        // Bersihkan buffer
+        while (ob_get_level() > 0) {
             ob_end_clean();
         }
 
         \Log::info('=== EXPORT EXCEL START ===');
-        \Log::info('=== EXPORT EXCEL START ===');
         \Log::info('User: ' . session('username'));
         \Log::info('Jabatan: ' . session('jabatan'));
-    
+
         $allData = $this->database->getReference($this->tablename)->getValue() ?? [];
         
         $jabatan = session('jabatan');
@@ -452,6 +451,8 @@ class FirebaseController extends Controller
         }
         
         \Log::info('Jumlah data setelah filter: ' . count($filteredData));
+
+        // Panggil generateExcel dan return
         return $this->generateExcel($filteredData, $startDate, $endDate, $jabatan, $filterDivisi, $filterUnit, $filterEstate);
     }
 
@@ -548,19 +549,14 @@ class FirebaseController extends Controller
 
             \Log::info('generateExcel selesai, file: ' . $filename . ', temp: ' . $tempFile . ', size: ' . filesize($tempFile));
 
-            // --- KIRIM RESPONSE MENGGUNAKAN response()->download (LANGSUNG) ---
-            // Ini adalah cara yang sama seperti /test-download yang berhasil
+            // --- GUNAKAN response()->download (SAMA SEPERTI TEST-DOWNLOAD) ---
             return response()->download($tempFile, $filename, [
                 'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                'Cache-Control' => 'max-age=0',
             ])->deleteFileAfterSend(true);
 
         } catch (\Exception $e) {
             \Log::error('Excel export error: ' . $e->getMessage());
-            \Log::error($e->getTraceAsString());
-            return response()->json([
-                'error' => 'Gagal generate Excel: ' . $e->getMessage()
-            ], 500);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
