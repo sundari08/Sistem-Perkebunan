@@ -343,7 +343,12 @@ class FirebaseController extends Controller
     
     // Export ke Excel berdasarkan filter
     public function exportExcel(Request $request)
-    {
+        {
+            while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        \Log::info('=== EXPORT EXCEL START ===');
         \Log::info('=== EXPORT EXCEL START ===');
         \Log::info('User: ' . session('username'));
         \Log::info('Jabatan: ' . session('jabatan'));
@@ -453,103 +458,110 @@ class FirebaseController extends Controller
     // Generate file Excel (PRIVATE METHOD)
     private function generateExcel($data, $startDate, $endDate, $jabatan = null, $filterDivisi = null, $filterUnit = null, $filterEstate = null)
     {
-        \Log::info('generateExcel dipanggil, jumlah data: ' . count($data));
+        try {
+            \Log::info('generateExcel dipanggil, jumlah data: ' . count($data));
 
-        // Buat spreadsheet
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
 
-        // --- TITLE ---
-        $title = "LAPORAN HASIL PANEN";
-        if ($startDate && $endDate) {
-            $title .= "\nPeriode: " . date('d/m/Y', strtotime($startDate)) . " - " . date('d/m/Y', strtotime($endDate));
+            // --- TITLE ---
+            $title = "LAPORAN HASIL PANEN";
+            if ($startDate && $endDate) {
+                $title .= "\nPeriode: " . date('d/m/Y', strtotime($startDate)) . " - " . date('d/m/Y', strtotime($endDate));
+            }
+            if (!empty($filterDivisi)) $title .= "\nFilter Divisi: " . $filterDivisi;
+            if (!empty($filterEstate)) $title .= "\nFilter Estate: " . $filterEstate;
+            if (!empty($filterUnit))   $title .= "\nFilter Unit: " . $filterUnit;
+            $title .= "\nDiexport oleh: " . session('username') . " (" . session('jabatan') . ")";
+
+            $sheet->setCellValue('A1', $title);
+            $sheet->mergeCells('A1:P1');
+            $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+            $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+            // --- HEADER ---
+            $headers = [
+                'No', 'Tanggal', 'Estate', 'Divisi', 'Blok',
+                'Mandor', 'Kerani', 'TPH', 'Pemanen',
+                'Janjang', 'Matang', 'Mentah', 'Kurang Matang',
+                'Lewat Matang', 'Partenor Carpi', 'Buah Batu'
+            ];
+            $col = 'A';
+            foreach ($headers as $h) {
+                $sheet->setCellValue($col . '3', $h);
+                $sheet->getStyle($col . '3')->getFont()->setBold(true);
+                $sheet->getStyle($col . '3')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFCCCCCC');
+                $sheet->getStyle($col . '3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $col++;
+            }
+
+            // --- DATA ---
+            $row = 4;
+            $no = 1;
+            foreach ($data as $item) {
+                $sheet->setCellValue('A' . $row, $no++);
+                $sheet->setCellValue('B' . $row, $item['tgl'] ?? '-');
+                $sheet->setCellValue('C' . $row, $item['estate'] ?? '-');
+                $sheet->setCellValue('D' . $row, $item['divisi'] ?? '-');
+                $sheet->setCellValue('E' . $row, $item['blok'] ?? '-');
+                $sheet->setCellValue('F' . $row, $item['mandor'] ?? '-');
+                $sheet->setCellValue('G' . $row, $item['kerani'] ?? '-');
+                $sheet->setCellValue('H' . $row, $item['tph'] ?? '-');
+                $sheet->setCellValue('I' . $row, $item['pemanen'] ?? '-');
+                $sheet->setCellValue('J' . $row, $item['janjang'] ?? 0);
+                $sheet->setCellValue('K' . $row, $item['matang'] ?? 0);
+                $sheet->setCellValue('L' . $row, $item['mentah'] ?? 0);
+                $sheet->setCellValue('M' . $row, $item['kurangmatang'] ?? 0);
+                $sheet->setCellValue('N' . $row, $item['lewatmatang'] ?? 0);
+                $sheet->setCellValue('O' . $row, $item['partenorcarpi'] ?? 0);
+                $sheet->setCellValue('P' . $row, $item['buahbatu'] ?? 0);
+                $row++;
+            }
+
+            // --- FOOTER ---
+            $footerRow = $row + 1;
+            $sheet->setCellValue('A' . $footerRow, "Total Data: " . count($data));
+            $sheet->mergeCells('A' . $footerRow . ':P' . $footerRow);
+            $sheet->getStyle('A' . $footerRow)->getFont()->setItalic(true);
+
+            // --- AUTO SIZE ---
+            foreach (range('A', 'P') as $c) {
+                $sheet->getColumnDimension($c)->setAutoSize(true);
+            }
+
+            // --- NAMA FILE ---
+            $username = session('username') ?? 'unknown';
+            $filterText = '';
+            if (!empty($filterUnit)) $filterText .= '_Unit_' . $filterUnit;
+            if (!empty($filterEstate)) $filterText .= '_Estate_' . $filterEstate;
+            if (!empty($filterDivisi)) $filterText .= '_Divisi_' . $filterDivisi;
+            $filename = 'Laporan_Hasil_Panen_' . $username . $filterText . '_' . date('Y-m-d_His') . '.xlsx';
+
+            // --- SIMPAN KE FILE SEMENTARA ---
+            $tempFile = tempnam(sys_get_temp_dir(), 'excel_');
+            if ($tempFile === false) {
+                throw new \Exception('Gagal membuat file temporary');
+            }
+
+            $writer = new Xlsx($spreadsheet);
+            $writer->save($tempFile);
+
+            \Log::info('generateExcel selesai, file: ' . $filename . ', temp: ' . $tempFile . ', size: ' . filesize($tempFile));
+
+            // --- KIRIM RESPONSE MENGGUNAKAN response()->download (LANGSUNG) ---
+            // Ini adalah cara yang sama seperti /test-download yang berhasil
+            return response()->download($tempFile, $filename, [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Cache-Control' => 'max-age=0',
+            ])->deleteFileAfterSend(true);
+
+        } catch (\Exception $e) {
+            \Log::error('Excel export error: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+            return response()->json([
+                'error' => 'Gagal generate Excel: ' . $e->getMessage()
+            ], 500);
         }
-        if (!empty($filterDivisi)) $title .= "\nFilter Divisi: " . $filterDivisi;
-        if (!empty($filterEstate)) $title .= "\nFilter Estate: " . $filterEstate;
-        if (!empty($filterUnit))   $title .= "\nFilter Unit: " . $filterUnit;
-        $title .= "\nDiexport oleh: " . session('username') . " (" . session('jabatan') . ")";
-
-        $sheet->setCellValue('A1', $title);
-        $sheet->mergeCells('A1:P1');
-        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-        // --- HEADER ---
-        $headers = [
-            'No', 'Tanggal', 'Estate', 'Divisi', 'Blok',
-            'Mandor', 'Kerani', 'TPH', 'Pemanen',
-            'Janjang', 'Matang', 'Mentah', 'Kurang Matang',
-            'Lewat Matang', 'Partenor Carpi', 'Buah Batu'
-        ];
-        $col = 'A';
-        foreach ($headers as $h) {
-            $sheet->setCellValue($col . '3', $h);
-            $sheet->getStyle($col . '3')->getFont()->setBold(true);
-            $sheet->getStyle($col . '3')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFCCCCCC');
-            $sheet->getStyle($col . '3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $col++;
-        }
-
-        // --- DATA ---
-        $row = 4;
-        $no = 1;
-        foreach ($data as $item) {
-            $sheet->setCellValue('A' . $row, $no++);
-            $sheet->setCellValue('B' . $row, $item['tgl'] ?? '-');
-            $sheet->setCellValue('C' . $row, $item['estate'] ?? '-');
-            $sheet->setCellValue('D' . $row, $item['divisi'] ?? '-');
-            $sheet->setCellValue('E' . $row, $item['blok'] ?? '-');
-            $sheet->setCellValue('F' . $row, $item['mandor'] ?? '-');
-            $sheet->setCellValue('G' . $row, $item['kerani'] ?? '-');
-            $sheet->setCellValue('H' . $row, $item['tph'] ?? '-');
-            $sheet->setCellValue('I' . $row, $item['pemanen'] ?? '-');
-            $sheet->setCellValue('J' . $row, $item['janjang'] ?? 0);
-            $sheet->setCellValue('K' . $row, $item['matang'] ?? 0);
-            $sheet->setCellValue('L' . $row, $item['mentah'] ?? 0);
-            $sheet->setCellValue('M' . $row, $item['kurangmatang'] ?? 0);
-            $sheet->setCellValue('N' . $row, $item['lewatmatang'] ?? 0);
-            $sheet->setCellValue('O' . $row, $item['partenorcarpi'] ?? 0);
-            $sheet->setCellValue('P' . $row, $item['buahbatu'] ?? 0);
-            $row++;
-        }
-
-        // --- FOOTER ---
-        $footerRow = $row + 1;
-        $sheet->setCellValue('A' . $footerRow, "Total Data: " . count($data));
-        $sheet->mergeCells('A' . $footerRow . ':P' . $footerRow);
-        $sheet->getStyle('A' . $footerRow)->getFont()->setItalic(true);
-
-        // --- AUTO SIZE ---
-        foreach (range('A', 'P') as $c) {
-            $sheet->getColumnDimension($c)->setAutoSize(true);
-        }
-
-        // --- NAMA FILE ---
-        $username = session('username') ?? 'unknown';
-        $filterText = '';
-        if (!empty($filterUnit)) $filterText .= '_Unit_' . $filterUnit;
-        if (!empty($filterEstate)) $filterText .= '_Estate_' . $filterEstate;
-        if (!empty($filterDivisi)) $filterText .= '_Divisi_' . $filterDivisi;
-        $filename = 'Laporan_Hasil_Panen_' . $username . $filterText . '_' . date('Y-m-d_His') . '.xlsx';
-
-        // --- SIMPAN KE FILE SEMENTARA ---
-        $tempFile = tempnam(sys_get_temp_dir(), 'excel_');
-        $writer = new Xlsx($spreadsheet);
-        $writer->save($tempFile);
-
-        \Log::info('generateExcel selesai, file: ' . $filename . ', temp: ' . $tempFile . ', size: ' . filesize($tempFile));
-
-        // --- KIRIM MANUAL (seperti /test-download) ---
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-        header('Cache-Control: max-age=0');
-        header('Cache-Control: must-revalidate');
-        header('Pragma: public');
-        header('Content-Length: ' . filesize($tempFile));
-
-        readfile($tempFile);
-        unlink($tempFile);
-        exit;
     }
 
     // Ambil daftar divisi yang tersedia untuk user yang login
