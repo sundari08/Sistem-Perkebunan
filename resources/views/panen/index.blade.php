@@ -155,4 +155,108 @@
         <div class="mt-2 text-xs text-center text-gray-500"><i class="fas fa-print"></i> Export Excel atau Ctrl+P</div>
     </div>
 </div>
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterEstate = document.querySelector('select[name="filter_estate"]');
+    const filterDivisi = document.querySelector('select[name="filter_divisi"]');
+    const filterUnit = document.querySelector('select[name="filter_unit"]');
+    const jabatan = "{{ session('jabatan') }}";
+    
+    // Fungsi untuk mengambil divisi berdasarkan estate (via AJAX)
+    function loadDivisiByEstate(estate) {
+        if (!estate) {
+            loadAllDivisi();
+            return;
+        }
+        
+        fetch(`/panen/get-divisi-by-estate?estate=${estate}`)
+            .then(response => response.json())
+            .then(data => {
+                if (filterDivisi) {
+                    filterDivisi.innerHTML = '<option value="">-- Semua Divisi --</option>';
+                    if (data.length > 0) {
+                        data.forEach(divisi => {
+                            const option = document.createElement('option');
+                            option.value = divisi;
+                            option.textContent = divisi;
+                            filterDivisi.appendChild(option);
+                        });
+                    }
+                }
+            })
+            .catch(error => console.error('Error loading divisi:', error));
+    }
+    
+    // Fungsi untuk load semua divisi
+    function loadAllDivisi() {
+        fetch(`/panen/get-all-divisi`)
+            .then(response => response.json())
+            .then(data => {
+                if (filterDivisi) {
+                    filterDivisi.innerHTML = '<option value="">-- Semua Divisi --</option>';
+                    if (data.length > 0) {
+                        data.forEach(divisi => {
+                            const option = document.createElement('option');
+                            option.value = divisi;
+                            option.textContent = divisi;
+                            filterDivisi.appendChild(option);
+                        });
+                    }
+                }
+            })
+            .catch(error => console.error('Error loading divisi:', error));
+    }
+    
+    // Fungsi untuk load estate berdasarkan unit (untuk DIREKTUR)
+    function loadEstatesByUnit(unit) {
+        if (!unit) return;
+        
+        fetch(`/panen/get-estates-by-unit?unit=${unit}`)
+            .then(response => response.json())
+            .then(data => {
+                if (filterEstate) {
+                    filterEstate.innerHTML = '<option value="">-- Semua Estate --</option>';
+                    if (data.estates && data.estates.length > 0) {
+                        data.estates.forEach(estate => {
+                            const option = document.createElement('option');
+                            option.value = estate;
+                            option.textContent = estate;
+                            filterEstate.appendChild(option);
+                        });
+                    }
+                    // Trigger change event untuk load divisi
+                    if (filterEstate.value) {
+                        loadDivisiByEstate(filterEstate.value);
+                    } else {
+                        loadAllDivisi();
+                    }
+                }
+            })
+            .catch(error => console.error('Error loading estates:', error));
+    }
+    
+    // Event listener untuk perubahan estate
+    if (filterEstate) {
+        filterEstate.addEventListener('change', function() {
+            loadDivisiByEstate(this.value);
+        });
+    }
+    
+    // Event listener untuk perubahan unit (khusus DIREKTUR)
+    if (filterUnit && jabatan === 'DIREKTUR') {
+        filterUnit.addEventListener('change', function() {
+            loadEstatesByUnit(this.value);
+        });
+    }
+    
+    // Inisialisasi awal: jika sudah ada filter estate, load divisinya
+    if (filterEstate && filterEstate.value) {
+        loadDivisiByEstate(filterEstate.value);
+    } else if (filterDivisi && filterEstate && !filterEstate.value) {
+        loadAllDivisi();
+    }
+});
+</script>
+@endpush
 @endsection
