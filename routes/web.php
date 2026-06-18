@@ -60,7 +60,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/panen/get-all-divisi', [FirebaseController::class, 'getAllDivisi'])->name('panen.getAllDivisi');
     Route::get('/panen/get-estates-by-unit', [FirebaseController::class, 'getEstatesByUnit'])->name('panen.getEstatesByUnit');
     
-    Route::get('/api/statistik-bulan', [FirebaseController::class, 'statistikBulan'])->middleware('auth');
+    Route::get('/api/statistik-bulan', [FirebaseController::class, 'statistikBulan'])->name('panen.statistik')->middleware('auth');
 
     // Route untuk yang bisa INPUT DATA (KERANI & ADMIN)
     Route::middleware(['role:input_data'])->group(function () {
