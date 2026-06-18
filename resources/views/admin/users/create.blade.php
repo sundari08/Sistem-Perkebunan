@@ -7,7 +7,7 @@
     <div class="bg-white rounded-lg shadow-lg p-6">
         <h2 class="text-2xl font-bold text-gray-800 mb-6">Tambah User Baru</h2>
         
-        <form method="POST" action="{{ route('admin.users.store') }}">
+        <form method="POST" action="{{ secure_url('admin.users.store') }}">
             @csrf
             
             <div class="mb-4">

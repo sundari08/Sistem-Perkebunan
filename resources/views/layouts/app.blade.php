@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Hasil Panen')</title>
     <!-- Favicon emoji (aman) -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+    <link rel="icon" type="image/png" href="{{ asset('PG.png') }}">
     <!-- Tailwind, Font Awesome, SweetAlert2 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -17,7 +17,7 @@
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center">
-                    <h1 class="text-xl font-bold text-green-600">🌿 Hasil Panen</h1>
+                    <h1 class="text-xl font-bold text-green-600"> Hasil Panen</h1>
                 </div>
                 <div class="flex items-center space-x-4">
                     @if(session('jabatan') == 'ADMIN')
@@ -29,7 +29,7 @@
                         <a href="{{ route('dashboard') }}" class="text-gray-700 hover:text-green-600">Home</a>
                     @endif
                     <!-- Logout dengan form POST -->
-                    <form action="{{ route('logout') }}" method="POST" class="inline">
+                    <form method="POST" action="{{ secure_url('logout') }}" class="inline">
                         @csrf
                         <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">Logout</button>
                     </form>

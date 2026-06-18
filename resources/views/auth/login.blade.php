@@ -12,7 +12,7 @@
     <div class="min-h-screen flex items-center justify-center">
         <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
             <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-green-600">🌿 Hasil Panen</h1>
+                <h1 class="text-3xl font-bold text-green-600"> Hasil Panen</h1>
                 <p class="text-gray-600 mt-2">Silakan login untuk melanjutkan</p>
             </div>
 
@@ -29,7 +29,7 @@
             @endif
 
             <!-- Form login dengan secure URL (pakai route helper) -->
-            <form method="POST" action="{{ route('login.post') }}">
+            <form method="POST" action="{{ secure_url('login') }}">
                 @csrf
                 <div class="mb-4">
                     <label class="block text-gray-700 font-bold mb-2">Username</label>

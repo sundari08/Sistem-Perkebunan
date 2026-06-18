@@ -51,8 +51,8 @@
                         <td class="px-4 py-2 border">{{ $user['unit'] ?? '-' }}</td>
                         <td class="px-4 py-2 border">{{ $user['otorisasi'] ?? '-' }}</td>
                         <td class="px-4 py-2 border">
-                            <a href="{{ route('admin.users.edit', $id) }}" class="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600">Edit</a>
-                            <form action="{{ route('admin.users.destroy', $id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin hapus user ini?')">
+                            <a href="{{ secure_url('admin.users.edit', $id) }}" class="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600">Edit</a>
+                            <form action="{{ secure_url('admin.users.destroy', $id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin hapus user ini?')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600">Hapus</button>

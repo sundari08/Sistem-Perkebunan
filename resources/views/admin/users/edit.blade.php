@@ -7,7 +7,7 @@
     <div class="bg-white rounded-lg shadow-lg p-6">
         <h2 class="text-2xl font-bold text-gray-800 mb-6">Edit User: {{ $user['username'] }}</h2>
         
-        <form method="POST" action="{{ route('admin.users.update', $user['id']) }}">
+        <form method="POST" action="{{ secure_url('admin.users.update', $user['id']) }}">
             @csrf
             @method('PUT')
             
