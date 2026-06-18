@@ -455,7 +455,7 @@ class FirebaseController extends Controller
     {
         \Log::info('generateExcel dipanggil, jumlah data: ' . count($data));
 
-        // Hapus semua output buffer
+        // Bersihkan semua output buffer
         while (ob_get_level()) {
             ob_end_clean();
         }
@@ -539,12 +539,16 @@ class FirebaseController extends Controller
 
         // --- SIMPAN KE FILE SEMENTARA ---
         $tempFile = tempnam(sys_get_temp_dir(), 'excel_');
+        if ($tempFile === false) {
+            throw new \Exception('Gagal membuat file temporary');
+        }
+
         $writer = new Xlsx($spreadsheet);
         $writer->save($tempFile);
 
-        \Log::info('generateExcel selesai, file: ' . $filename . ', temp: ' . $tempFile);
+        \Log::info('generateExcel selesai, file: ' . $filename . ', temp: ' . $tempFile . ', size: ' . filesize($tempFile));
 
-        // --- KIRIM RESPONSE MANUAL (LANGSUNG) ---
+        // --- KIRIM MANUAL (seperti /test-download) ---
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
         header('Cache-Control: max-age=0');
@@ -554,7 +558,7 @@ class FirebaseController extends Controller
 
         readfile($tempFile);
         unlink($tempFile);
-        exit; // ← Hentikan eksekusi agar tidak ada output tambahan
+        exit;
     }
 
     // Ambil daftar divisi yang tersedia untuk user yang login
