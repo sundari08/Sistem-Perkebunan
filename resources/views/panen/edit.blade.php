@@ -8,10 +8,10 @@
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-800">Edit Hasil Panen</h2>
             <div class="space-x-2">
-                <a href="{{ route('dashboard') }}" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                <a href="{{ secure_url('dashboard') }}" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
                     <i class="fas fa-tachometer-alt"></i> Dashboard
                 </a>
-                <a href="{{ route('panen.index') }}" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
+                <a href="{{ secure_url('panen.index') }}" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
                     <i class="fas fa-arrow-left"></i> Kembali
                 </a>
             </div>
@@ -23,7 +23,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('panen.update', $id) }}" id="formHasilPanen">
+        <form method="POST" action="{{ secure_url('panen.update', $id) }}" id="formHasilPanen">
             @csrf
             @method('PUT')
 

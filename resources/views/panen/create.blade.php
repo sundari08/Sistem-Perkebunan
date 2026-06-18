@@ -8,10 +8,10 @@
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold text-gray-800">Tambah Data Hasil Panen</h2>
                 <div class="space-x-2">
-                    <a href="{{ route('dashboard') }}" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                    <a href="{{ secure_url('dashboard') }}" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
                         <i class="fas fa-tachometer-alt"></i> Dashboard
                     </a>
-                    <a href="{{ route('panen.index') }}" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
+                    <a href="{{ secure_url('panen.index') }}" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
                         <i class="fas fa-arrow-left"></i> Kembali
                     </a>
                 </div>
@@ -21,7 +21,7 @@
                 <div class="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded mb-4">{{ session('error') }}</div>
             @endif
 
-            <form method="POST" action="{{ route('panen.store') }}" id="formHasilPanen">
+            <form method="POST" action="{{ secure_url('panen.store') }}" id="formHasilPanen">
                 @csrf
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Tanggal -->
@@ -146,7 +146,7 @@
                     <button type="reset" class="bg-gray-400 text-white px-6 py-2 rounded-lg hover:bg-gray-500">
                         <i class="fas fa-undo"></i> Reset
                     </button>
-                    <a href="{{ route('panen.index') }}" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600">
+                    <a href="{{ secure_url('panen.index') }}" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600">
                         <i class="fas fa-times"></i> Batal
                     </a>
                 </div>

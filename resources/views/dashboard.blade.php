@@ -83,7 +83,7 @@
 
         <!-- Logout -->
         <div class="mt-6 text-center">
-            <form method="POST" action="{{ route('logout') }}" class="inline">
+            <form method="POST" action="{{ secure_url('logout') }}" class="inline">
                 @csrf
                 <button type="submit" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 w-full sm:w-auto">
                     <i class="fas fa-sign-out-alt"></i> Logout

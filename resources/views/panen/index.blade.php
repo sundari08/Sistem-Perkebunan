@@ -17,11 +17,11 @@
             </h2>
             <div class="flex items-center gap-4 w-full md:w-auto justify-end">
                 @if(str_contains(session('otorisasi'), 'input data') || session('jabatan') == 'ADMIN')
-                    <a href="{{ route('panen.create') }}" class="bg-green-500 text-white px-5 py-2 rounded-lg hover:bg-green-600">
+                    <a href="{{ secure_url('panen.create') }}" class="bg-green-500 text-white px-5 py-2 rounded-lg hover:bg-green-600">
                         <i class="fas fa-plus-circle"></i> Tambah Data
                     </a>
                 @endif
-                <a href="{{ route('dashboard') }}" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
+                <a href="{{ secure_url('dashboard') }}" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
                     <i class="fas fa-arrow-left"></i> Kembali
                 </a>
             </div>
@@ -29,7 +29,7 @@
 
         <!-- Form Filter -->
         <div class="bg-gradient-to-r from-blue-50 to-gray-50 p-5 rounded-lg mb-6 shadow-sm">
-            <form method="GET" action="{{ route('panen.index') }}" class="flex flex-wrap gap-3 items-end">
+            <form method="GET" action="{{ secure_url('panen.index') }}" class="flex flex-wrap gap-3 items-end">
                 <!-- Filter Tanggal -->
                 <div class="flex-1 min-w-[150px]">
                     <label class="block text-gray-700 text-sm font-semibold mb-1">Dari Tanggal</label>
@@ -140,14 +140,14 @@
                         <td class="px-3 py-2 border text-right hidden xl:table-cell">{{ number_format($item['buahbatu'] ?? 0) }}</td>
                         <td class="px-3 py-2 border text-center">
                             <div class="flex justify-center space-x-1">
-                                <a href="{{ route('panen.show', $id) }}" class="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600" title="Detail">
+                                <a href="{{ secure_url('panen.show', $id) }}" class="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600" title="Detail">
                                     <i class="fas fa-eye"></i>
                                 </a>
                                 @if($canEditDelete)
-                                <a href="{{ route('panen.edit', $id) }}" class="bg-yellow-500 text-white px-2 py-1 rounded text-xs hover:bg-yellow-600" title="Edit">
+                                <a href="{{ secure_url('panen.edit', $id) }}" class="bg-yellow-500 text-white px-2 py-1 rounded text-xs hover:bg-yellow-600" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <form action="{{ route('panen.destroy', $id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin hapus?')">
+                                <form action="{{ secure_url('panen.destroy', $id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin hapus?')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600" title="Hapus">

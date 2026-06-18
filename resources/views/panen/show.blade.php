@@ -10,11 +10,11 @@
             <div class="space-x-2">
                 @php $canEditDelete = (str_contains(session('otorisasi'), 'edit, hapus') || session('jabatan') == 'ADMIN'); @endphp
                 @if($canEditDelete)
-                <a href="{{ route('panen.edit', $id) }}" class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600">
+                <a href="{{ secure_url('panen.edit', $id) }}" class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600">
                     <i class="fas fa-edit"></i> Edit
                 </a>
                 @endif
-                <a href="{{ route('panen.index') }}" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
+                <a href="{{ secure_url('panen.index') }}" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
                     <i class="fas fa-arrow-left"></i> Kembali
                 </a>
             </div>
