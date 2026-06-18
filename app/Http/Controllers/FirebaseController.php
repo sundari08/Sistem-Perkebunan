@@ -343,15 +343,16 @@ class FirebaseController extends Controller
     
     // Export ke Excel berdasarkan filter
     public function exportExcel(Request $request)
-        // Bersihkan buffer
-        while (ob_get_level() > 0) {
+        {
+            while (ob_get_level() > 0) {
             ob_end_clean();
         }
 
         \Log::info('=== EXPORT EXCEL START ===');
+        \Log::info('=== EXPORT EXCEL START ===');
         \Log::info('User: ' . session('username'));
         \Log::info('Jabatan: ' . session('jabatan'));
-
+    
         $allData = $this->database->getReference($this->tablename)->getValue() ?? [];
         
         $jabatan = session('jabatan');
@@ -451,8 +452,6 @@ class FirebaseController extends Controller
         }
         
         \Log::info('Jumlah data setelah filter: ' . count($filteredData));
-
-        // Panggil generateExcel dan return
         return $this->generateExcel($filteredData, $startDate, $endDate, $jabatan, $filterDivisi, $filterUnit, $filterEstate);
     }
 
