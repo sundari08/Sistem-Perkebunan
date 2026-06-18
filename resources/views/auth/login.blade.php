@@ -6,7 +6,7 @@
     <title>Login - Hasil Panen</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Favicon aman -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+    <link rel="icon" type="image/png" href="{{ secure_asset('PG.ico') }}">
 </head>
 <body class="bg-gray-100">
     <div class="min-h-screen flex items-center justify-center">
