@@ -7,7 +7,7 @@
     <title>@yield('title', 'Hasil Panen')</title>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ asset('pg.ico') }}">
+    <link rel="icon" type="image/x-icon" href="{{ secure_asset('pg.png') }}">
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
