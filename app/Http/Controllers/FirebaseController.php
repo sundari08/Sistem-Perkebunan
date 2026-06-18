@@ -446,6 +446,7 @@ class FirebaseController extends Controller
             $filteredData = $dateFiltered;
         }
         
+        \Log::info('Jumlah data setelah filter: ' . count($filteredData));
         return $this->generateExcel($filteredData, $startDate, $endDate, $jabatan, $filterDivisi, $filterUnit, $filterEstate);
     }
 
