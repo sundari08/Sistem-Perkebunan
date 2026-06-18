@@ -451,20 +451,19 @@ class FirebaseController extends Controller
     }
 
     // Generate file Excel (PRIVATE METHOD)
-   private function generateExcel($data, $startDate, $endDate, $jabatan = null, $filterDivisi = null, $filterUnit = null, $filterEstate = null)
+  private function generateExcel($data, $startDate, $endDate, $jabatan = null, $filterDivisi = null, $filterUnit = null, $filterEstate = null)
     {
         \Log::info('generateExcel dipanggil, jumlah data: ' . count($data));
 
-        // Hapus semua output buffer yang mungkin ada
+        // Hapus semua output buffer
         while (ob_get_level()) {
             ob_end_clean();
         }
 
-        // Buat spreadsheet
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        // Title
+        // --- Title ---
         $title = "LAPORAN HASIL PANEN";
         if ($startDate && $endDate) {
             $title .= "\nPeriode: " . date('d/m/Y', strtotime($startDate)) . " - " . date('d/m/Y', strtotime($endDate));
@@ -479,7 +478,7 @@ class FirebaseController extends Controller
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-        // Header
+        // --- Header ---
         $headers = [
             'No', 'Tanggal', 'Estate', 'Divisi', 'Blok',
             'Mandor', 'Kerani', 'TPH', 'Pemanen',
@@ -495,7 +494,7 @@ class FirebaseController extends Controller
             $col++;
         }
 
-        // Data
+        // --- Data ---
         $row = 4;
         $no = 1;
         foreach ($data as $item) {
@@ -518,18 +517,18 @@ class FirebaseController extends Controller
             $row++;
         }
 
-        // Footer
+        // --- Footer ---
         $footerRow = $row + 1;
         $sheet->setCellValue('A' . $footerRow, "Total Data: " . count($data));
         $sheet->mergeCells('A' . $footerRow . ':P' . $footerRow);
         $sheet->getStyle('A' . $footerRow)->getFont()->setItalic(true);
 
-        // Auto size
+        // --- Auto size ---
         foreach (range('A', 'P') as $c) {
             $sheet->getColumnDimension($c)->setAutoSize(true);
         }
 
-        // Nama file
+        // --- Nama file ---
         $username = session('username') ?? 'unknown';
         $filterText = '';
         if (!empty($filterUnit)) $filterText .= '_Unit_' . $filterUnit;
@@ -537,18 +536,17 @@ class FirebaseController extends Controller
         if (!empty($filterDivisi)) $filterText .= '_Divisi_' . $filterDivisi;
         $filename = 'Laporan_Hasil_Panen_' . $username . $filterText . '_' . date('Y-m-d_His') . '.xlsx';
 
-        // Simpan ke file sementara
-        $tempFile = tempnam(sys_get_temp_dir(), 'excel_');
-        $writer = new Xlsx($spreadsheet);
-        $writer->save($tempFile);
-
         \Log::info('generateExcel selesai, file: ' . $filename);
 
-        // Kembalikan response download (Laravel akan urus header)
-        return response()->download($tempFile, $filename, [
+        // ✅ KIRIM RESPONSE STREAM
+        return response()->streamDownload(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, $filename, [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
             'Cache-Control' => 'max-age=0',
-        ])->deleteFileAfterSend(true);
+        ]);
     }
 
     // Ambil daftar divisi yang tersedia untuk user yang login
