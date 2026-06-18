@@ -88,7 +88,7 @@
                 <div class="flex flex-wrap gap-2 col-span-1 sm:col-span-2 lg:col-span-4 mt-2">
                     <button type="submit" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm hover:bg-blue-700">Cari</button>
                     <a href="{{ route('panen.index') }}" class="bg-gray-500 text-white px-4 py-1.5 rounded-lg text-sm hover:bg-gray-600">Reset</a>
-                    <a href="{{ route('panen.export', request()->all()) }}" class="bg-green-700 text-white px-4 py-1.5 rounded-lg text-sm hover:bg-green-800">Export Excel</a>
+                    <a href="{{ secure_url('/panen/export?' . http_build_query(request()->all())) }}" class="bg-green-700 text-white px-4 py-1.5 rounded-lg text-sm hover:bg-green-800">Export Excel</a>
                 </div>
             </form>
         </div>
