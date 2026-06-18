@@ -3,6 +3,11 @@
 @section('title', 'Daftar Hasil Panen')
 
 @section('content')
+{{-- ===== DEFINISIKAN DI AWAL ===== --}}
+@php
+    $canEditDelete = (str_contains(session('otorisasi'), 'edit, hapus') || session('jabatan') == 'ADMIN');
+@endphp
+
 <div class="max-w-full mx-auto px-2 sm:px-4">
     <div class="bg-white rounded-lg shadow-lg p-3 sm:p-6">
         <!-- Header -->
@@ -22,7 +27,7 @@
             </div>
         </div>
 
-        <!-- Form Filter (Responsif) -->
+        <!-- Form Filter Responsif -->
         <div class="bg-gradient-to-r from-blue-50 to-gray-50 p-3 sm:p-5 rounded-lg mb-4 shadow-sm">
             <form method="GET" action="{{ route('panen.index') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
                 <!-- Tanggal -->
@@ -56,22 +61,26 @@
                     <label class="block text-gray-700 text-xs sm:text-sm font-semibold mb-1">Filter Estate</label>
                     <select name="filter_estate" class="w-full border rounded-lg px-2 py-1.5 text-sm">
                         <option value="">-- Semua Estate --</option>
-                        @foreach($availableEstates as $estate)
-                            <option value="{{ $estate }}" {{ request('filter_estate') == $estate ? 'selected' : '' }}>{{ $estate }}</option>
-                        @endforeach
+                        @if(isset($availableEstates) && count($availableEstates) > 0)
+                            @foreach($availableEstates as $estate)
+                                <option value="{{ $estate }}" {{ request('filter_estate') == $estate ? 'selected' : '' }}>{{ $estate }}</option>
+                            @endforeach
+                        @endif
                     </select>
                 </div>
                 @endif
                 
-                <!-- Filter Divisi (semua kecuali Asisten) -->
+                <!-- Filter Divisi (kecuali Asisten) -->
                 @if(session('jabatan') != 'ASISTEN')
                 <div>
                     <label class="block text-gray-700 text-xs sm:text-sm font-semibold mb-1">Filter Divisi</label>
                     <select name="filter_divisi" class="w-full border rounded-lg px-2 py-1.5 text-sm">
                         <option value="">-- Semua Divisi --</option>
-                        @foreach($availableDivisis as $divisi)
-                            <option value="{{ $divisi }}" {{ request('filter_divisi') == $divisi ? 'selected' : '' }}>{{ $divisi }}</option>
-                        @endforeach
+                        @if(isset($availableDivisis) && count($availableDivisis) > 0)
+                            @foreach($availableDivisis as $divisi)
+                                <option value="{{ $divisi }}" {{ request('filter_divisi') == $divisi ? 'selected' : '' }}>{{ $divisi }}</option>
+                            @endforeach
+                        @endif
                     </select>
                 </div>
                 @endif
@@ -155,21 +164,18 @@
         <div class="mt-2 text-xs text-center text-gray-500"><i class="fas fa-print"></i> Export Excel atau Ctrl+P</div>
     </div>
 </div>
+
 @push('scripts')
 <script>
+// Script tetap sama (tidak diubah)
 document.addEventListener('DOMContentLoaded', function() {
     const filterEstate = document.querySelector('select[name="filter_estate"]');
     const filterDivisi = document.querySelector('select[name="filter_divisi"]');
     const filterUnit = document.querySelector('select[name="filter_unit"]');
     const jabatan = "{{ session('jabatan') }}";
     
-    // Fungsi untuk mengambil divisi berdasarkan estate (via AJAX)
     function loadDivisiByEstate(estate) {
-        if (!estate) {
-            loadAllDivisi();
-            return;
-        }
-        
+        if (!estate) { loadAllDivisi(); return; }
         fetch(`/panen/get-divisi-by-estate?estate=${estate}`)
             .then(response => response.json())
             .then(data => {
@@ -188,7 +194,6 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => console.error('Error loading divisi:', error));
     }
     
-    // Fungsi untuk load semua divisi
     function loadAllDivisi() {
         fetch(`/panen/get-all-divisi`)
             .then(response => response.json())
@@ -208,10 +213,8 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => console.error('Error loading divisi:', error));
     }
     
-    // Fungsi untuk load estate berdasarkan unit (untuk DIREKTUR)
     function loadEstatesByUnit(unit) {
         if (!unit) return;
-        
         fetch(`/panen/get-estates-by-unit?unit=${unit}`)
             .then(response => response.json())
             .then(data => {
@@ -225,32 +228,25 @@ document.addEventListener('DOMContentLoaded', function() {
                             filterEstate.appendChild(option);
                         });
                     }
-                    // Trigger change event untuk load divisi
-                    if (filterEstate.value) {
-                        loadDivisiByEstate(filterEstate.value);
-                    } else {
-                        loadAllDivisi();
-                    }
+                    if (filterEstate.value) loadDivisiByEstate(filterEstate.value);
+                    else loadAllDivisi();
                 }
             })
             .catch(error => console.error('Error loading estates:', error));
     }
     
-    // Event listener untuk perubahan estate
     if (filterEstate) {
         filterEstate.addEventListener('change', function() {
             loadDivisiByEstate(this.value);
         });
     }
     
-    // Event listener untuk perubahan unit (khusus DIREKTUR)
     if (filterUnit && jabatan === 'DIREKTUR') {
         filterUnit.addEventListener('change', function() {
             loadEstatesByUnit(this.value);
         });
     }
     
-    // Inisialisasi awal: jika sudah ada filter estate, load divisinya
     if (filterEstate && filterEstate.value) {
         loadDivisiByEstate(filterEstate.value);
     } else if (filterDivisi && filterEstate && !filterEstate.value) {
