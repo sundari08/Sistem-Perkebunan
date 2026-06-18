@@ -44,15 +44,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/panen/export', [FirebaseController::class, 'exportExcel'])->name('panen.export');
     // HAPUS route /export-panen di bawah ini!
     
-    Route::get('/debug-session', function() {
-        return [
-            'username' => session('username'),
-            'jabatan' => session('jabatan'),
-            'estate' => session('estate'),
-            'divisi' => session('divisi'),
-            'unit' => session('unit'),
-            'otorisasi' => session('otorisasi'),
-        ];
+    Route::get('/test-download', function () {
+        $content = 'Hello, this is a test file.';
+        $tempFile = tempnam(sys_get_temp_dir(), 'test_');
+        file_put_contents($tempFile, $content);
+        return response()->download($tempFile, 'test.txt')->deleteFileAfterSend(true);
     });
 
     Route::get('/panen/get-divisi-user', [FirebaseController::class, 'getDivisiByUser'])->name('panen.getDivisiByUser');
